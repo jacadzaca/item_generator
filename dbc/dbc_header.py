@@ -12,6 +12,7 @@ class DBCHeader():
     size: int
 
     def __init__(self, file):
+        file.seek(0)
         self.size = 4 * 5
         header_bytes = file.read(self.size)
         self.magic = header_bytes[0:4]
