@@ -1,4 +1,4 @@
-import bytes_util
+import dbc.bytes_util as bytes_util
 
 
 class RecordIterator():
