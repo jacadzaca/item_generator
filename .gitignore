@@ -1,4 +1,6 @@
 generated/*
 random-staff.json
+dbc/__pycache__/*
+dbc/records/__pycache__/*
 __pycache__/*
 Item.dbc
