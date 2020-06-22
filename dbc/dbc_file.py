@@ -4,23 +4,18 @@ from dbc_header import DBCHeader
 from dbc.records.record_iterator import RecordIterator
 
 
-class DBCObject():
+class DBCFile():
     '''
-    dbc_file MUST be opened in a rb+ mode
+    file_descriptor MUST be opened in a rb+ mode
     '''
 
-    def __init__(self, dbc_file):
-        self._f = dbc_file
+    def __init__(self, file_descriptor, template_entry):
+        self._f = file_descriptor
         self._header = DBCHeader(self._f)
         self._records = RecordIterator(self._f, self._header)
-        self._template = None
-
-    def set_template_record(self, entry):
-        self._template = dbc.edit.find(entry, self._records)
+        self._template = dbc.edit.find(template_entry, self._records)
 
     def add_record(self, entry, display_id):
-        if self._template is None:
-            raise ValueError(f'no template, {self}.set_template_record() ')
         template = copy.deepcopy(self._template)
         template.entry = entry
         template.display_id = display_id
