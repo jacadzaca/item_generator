@@ -4,7 +4,7 @@ def generate_preface(template_entry: int, first_entry: int):
         f'SET SQL_SAFE_UPDATES = 0;\n' \
         f'CREATE TEMPORARY TABLE tmp SELECT *' \
         f'FROM item_template WHERE entry = {template_entry};\n' \
-        f'UPDATE tmp SET entry={first_entry - 1}' \
+        f'UPDATE tmp SET entry={first_entry - 1} ' \
         f'WHERE entry = {template_entry};\n'
 
 
