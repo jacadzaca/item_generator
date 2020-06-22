@@ -1,4 +1,4 @@
-import bytes_util
+import dbc.bytes_util as bytes_util
 from dataclasses import dataclass
 
 
@@ -16,7 +16,7 @@ class DBCHeader():
         self.size = 4 * 5
         header_bytes = file.read(self.size)
         self.magic = header_bytes[0:4]
-        self.record_count = bytes_util.bytes_util.to_int(header_bytes[4:8])
+        self.record_count = bytes_util.to_int(header_bytes[4:8])
         self.field_count = bytes_util.to_int(header_bytes[8:12])
         self.record_size = bytes_util.to_int(header_bytes[12:16])
         self.string_block_size = bytes_util.to_int(header_bytes[16:20])
