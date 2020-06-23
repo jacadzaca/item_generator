@@ -22,6 +22,12 @@ class RecordIterator():
         return [bytes_util.to_int(self._f.read(self._field_size))
                 for _ in range(self._header.field_count)]
 
+    """
+    when using, keep in mind that @file_handler's
+    position is being manged by this class
+    @record_cretor is a constructor for the record
+    that is supposed to be returned during iteration
+    """
     @classmethod
     def create(cls, file_handler, dbc_header, record_creator):
         field_size = dbc_header.record_size // dbc_header.field_count
