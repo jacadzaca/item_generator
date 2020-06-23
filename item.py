@@ -1,14 +1,16 @@
 import functools
 import itertools
 import statt
+from typing import Iterable
+from dataclasses import dataclass
 
 
+@dataclass
 class Item():
-    def __init__(self, name: str, entry: int, display_id: int, stats: iter):
-        self.name = name
-        self.entry = entry
-        self.display_id = display_id
-        self.stats = stats
+    name: str
+    entry: int
+    display_id: int
+    stats: Iterable
 
     def to_sql(self) -> str:
         return f'UPDATE item_template SET ' \
