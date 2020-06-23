@@ -17,11 +17,11 @@ class DBCFile():
     """
 
     def __init__(self, file_handle, header: DBCHeader,
-                 records: iter, template_entry: int):
+                 records: iter, template):
         self._f = file_handle
         self._header = header
         self.records = records
-        self._template = dbc.edit.find(template_entry, self.records)
+        self._template = template
 
     """
     in order for this method to work, the passed @file_handle
