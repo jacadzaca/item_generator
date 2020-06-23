@@ -1,6 +1,6 @@
 import copy
 import dbc.edit
-from dbc_header import DBCHeader
+from dbc.dbc_header import DBCHeader
 from dbc.records.record_iterator import RecordIterator
 
 """
