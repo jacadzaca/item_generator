@@ -13,7 +13,7 @@ def append_record(record, header, file):
     for field in record.to_bytes():
         file.write(field)
     # write strings...
-    file.write(b'\0')
+    file.write('\0'.joinrecord.strings())
 
 
 def find(entry, records):
