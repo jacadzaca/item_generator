@@ -24,6 +24,6 @@ class DBCFile():
     @classmethod
     def from_file_handle(cls, file_handle, record_creator, template_entry):
         header = DBCHeader(file_handle)
-        records = RecordIterator(file_handle, header, record_creator)
+        records = RecordIterator.create(file_handle, header, record_creator)
         template = dbc.edit.find(template_entry, records)
         return cls(file_handle, header, records, template)
