@@ -31,5 +31,5 @@ class RecordIterator():
     @classmethod
     def create(cls, file_handler, dbc_header, record_creator):
         field_size = dbc_header.record_size // dbc_header.field_count
-        size = dbc_header.record_count * dbc_header.header.record_size
+        size = dbc_header.record_count * dbc_header.record_size
         return cls(file_handler, dbc_header, record_creator, field_size, size)
