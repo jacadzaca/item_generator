@@ -1,11 +1,15 @@
 import functools
 import itertools
 import statt
-from dataclasses import dataclass
 
 
-@dataclass
 class Item():
+    def __init__(self, name: str, entry: int, display_id: int, stats: iter):
+        self.name = name
+        self.entry = entry
+        self.display_id = display_id
+        self.stats = stats
+
     def to_sql(self) -> str:
         return f'UPDATE item_template SET ' \
                f'StatsCount={len(self.stats)}, ' \
