@@ -25,8 +25,8 @@ class RecordIterator():
     """
     when using, keep in mind that @file_handler's
     position is being manged by this class
-    @record_cretor is a constructor for the record
-    that is supposed to be returned during iteration
+    @record_cretor is a function returing an instance
+    of the record that should be returned during the iteration
     """
     @classmethod
     def create(cls, file_handler, dbc_header, record_creator):
