@@ -5,7 +5,7 @@ import random
 import itertools
 import functools
 import stat_iterator
-import mysql_generator
+import sql
 from item import Item
 from dbc.dbc_file import DBCFile
 from dbc.records.item_record import ItemRecord
@@ -54,14 +54,14 @@ def main():
             dbc_file = DBCFile.from_file_handle(dbc_f,
                                                 ItemRecord,
                                                 template_entry)
-            sql_f.write(mysql_generator.generate_preface(
+            sql_f.write(sql.generate_preface(
                 template_entry, first_entry))
             for item in items:
                 dbc_file.add_record(item.entry, item.display_id)
-                sql_f.write(mysql_generator.create_sql_insert(
+                sql_f.write(sql.create_sql_insert(
                     item.entry, item.entry - 1) + '\n')
                 sql_f.write(item.to_sql() + '\n')
-            sql_f.write(mysql_generator.generate_end() + '\n')
+            sql_f.write(sql.generate_end() + '\n')
 
 
 if __name__ == '__main__':
