@@ -1,6 +1,5 @@
 def generate_preface(template_entry: int, first_entry: int):
-    return 'DROP TABLE tmp;\n' \
-        f'USE world;\n' \
+    return f'USE world;\n' \
         f'SET SQL_SAFE_UPDATES = 0;\n' \
         f'CREATE TEMPORARY TABLE tmp SELECT *' \
         f'FROM item_template WHERE entry = {template_entry};\n' \
