@@ -16,12 +16,13 @@ def _create_item(name, display_ids, stats, entry):
 
 
 def main():
-    usage = 'usage: item-creator item_definition.json' \
+    usage = 'usage: item-creator item_definition.json ' \
             '[sql_file] [Item.dbc path]'
     default_sql = 'generated/random-items.sql'
     default_item_dbc = 'generated/Item.dbc'
     if (len(sys.argv) < 2):
         print(usage)
+        print('item_definition.json is missing!')
         sys.exit(-1)
     item_definition = sys.argv[1]
     sql_file = sys.argv[2] if 2 < len(sys.argv) else default_sql
