@@ -1,8 +1,11 @@
 import dbc.bytes_util as bytes_util
+from typing import BinaryIO
+from dbc.dbc_header import DBCHeader
 
 
 class RecordIterator():
-    def __init__(self, file, dbc_header, record_creator, field_size, size):
+    def __init__(self, file: BinaryIO, dbc_header: DBCHeader,
+                 record_creator, field_size: int, size: int):
         self._f = file
         self._header = dbc_header
         self._record_creator = record_creator
@@ -29,7 +32,8 @@ class RecordIterator():
     of the record that should be returned during the iteration
     """
     @classmethod
-    def create(cls, file_handler, dbc_header, record_creator):
+    def create(cls, file_handler: BinaryIO,
+               dbc_header: DBCHeader, record_creator):
         field_size = dbc_header.record_size // dbc_header.field_count
         size = dbc_header.record_count * dbc_header.record_size
         return cls(file_handler, dbc_header, record_creator, field_size, size)
