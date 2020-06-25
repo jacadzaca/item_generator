@@ -1,4 +1,6 @@
 from statt import Stat
+from typing import List
+from typing import Mapping
 from stat_type import StatType
 
 
@@ -24,6 +26,7 @@ class StatIterator():
         return f'{self.stat_type} min:{self.min_value}, max:{self.max_value}'
 
 
-def get_iterators(stats: dict) -> list:
+def get_iterators(stats: Mapping[Stat,
+                                 Mapping[str, int]]) -> List[StatIterator]:
     return [StatIterator(StatType[stat.upper()], stats[stat]['minValue'],
                          stats[stat]['maxValue']) for stat in stats.keys()]

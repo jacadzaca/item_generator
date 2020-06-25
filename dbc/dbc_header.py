@@ -1,3 +1,5 @@
+from typing import List
+from typing import BinaryIO
 import dbc.bytes_util as bytes_util
 from dataclasses import dataclass
 
@@ -11,7 +13,7 @@ class DBCHeader():
     string_block_size: int
     size: int
 
-    def to_bytes(self):
+    def to_bytes(self) -> List[bytes]:
         return [self.magic,
                 bytes_util.to_bytes(self.record_count, 4),
                 bytes_util.to_bytes(self.field_count, 4),
@@ -23,7 +25,7 @@ class DBCHeader():
     @see https://wowdev.wiki/DBC
     '''
     @classmethod
-    def from_file_handle(cls, file_handle):
+    def from_file_handle(cls, file_handle: BinaryIO):
         file_handle.seek(0)
         size = 4 * 5
         header_bytes = file_handle.read(size)

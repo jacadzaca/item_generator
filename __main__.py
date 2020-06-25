@@ -1,17 +1,20 @@
 #!/usr/bin/python3
 import sys
+import sql
 import json
 import random
 import itertools
 import functools
 import stat_iterator
-import sql
 from item import Item
+from typing import Sequence
 from dbc.dbc_file import DBCFile
+from stat_iterator import StatIterator
 from dbc.records.item_record import ItemRecord
 
 
-def _create_item(name, display_ids, stats, entry):
+def _create_item(name: str, display_ids: Sequence[int],
+                 stats: StatIterator, entry: str) -> Item:
     return Item(name, entry, random.choice(display_ids), stats)
 
 
@@ -55,8 +58,7 @@ def main():
             dbc_file = DBCFile.from_file_handle(dbc_f,
                                                 ItemRecord,
                                                 template_entry)
-            sql_f.write(sql.generate_preface(
-                template_entry, first_entry))
+            sql_f.write(sql.generate_preface(template_entry, first_entry))
             for item in items:
                 dbc_file.add_record(item.entry, item.display_id)
                 sql_f.write(sql.create_sql_insert(

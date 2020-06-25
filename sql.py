@@ -1,4 +1,4 @@
-def generate_preface(template_entry: int, first_entry: int):
+def generate_preface(template_entry: int, first_entry: int) -> str:
     return f'USE world;\n' \
         f'SET SQL_SAFE_UPDATES = 0;\n' \
         f'CREATE TEMPORARY TABLE tmp SELECT *' \
@@ -7,7 +7,7 @@ def generate_preface(template_entry: int, first_entry: int):
         f'WHERE entry = {template_entry};\n'
 
 
-def create_sql_insert(entry: int, last_entry: int):
+def create_sql_insert(entry: int, last_entry: int) -> str:
     if last_entry > entry:
         raise ValueError('item.entry must be greater than the last_entry')
     return f'UPDATE tmp SET entry={entry} WHERE entry = {last_entry}; ' \
