@@ -1,71 +1,53 @@
-#!/usr/bin/python3
-import sys
-import sql
-import json
+#!/usr/bin/env python3
+import argparse
+import pathlib
+import yaml
 import random
 import itertools
-import functools
-import stat_iterator
-from item import Item
-from typing import Sequence
+import collections
 from dbc.dbc_file import DBCFile
-from stat_iterator import StatIterator
 from dbc.records.item_record import ItemRecord
 
+ItemDefinition = collections.namedtuple('ItemDefinition', 'name first_entry template_entry display_ids attributes')
+Attribute = collections.namedtuple('Attribute', 'attribute_id value')
+Item = collections.namedtuple('Item', 'name entry display_id attributes')
 
-def _create_item(name: str, display_ids: Sequence[int],
-                 stats: StatIterator, entry: str) -> Item:
-    return Item(name, entry, random.choice(display_ids), stats)
-
+def to_attribute_id(attribute_name):
+    """
+    https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130222/item+template#item_template-stat_type
+    """
+    return {
+        'mana': 0,
+        'health': 1,
+        'agility': 3,
+        'strength': 4,
+        'intellect': 5,
+        'spirit': 6,
+    }[attribute_name]
 
 def main():
-    usage = 'usage: item-creator item_definition.json ' \
-            '[sql_file] [Item.dbc path]'
-    default_sql = 'generated/random-items.sql'
-    default_item_dbc = 'generated/Item.dbc'
-    if (len(sys.argv) < 2):
-        print(usage)
-        print('item_definition.json is missing!')
-        sys.exit(-1)
-    item_definition = sys.argv[1]
-    sql_file = sys.argv[2] if 2 < len(sys.argv) else default_sql
-    item_dbc = sys.argv[3] if 3 < len(sys.argv) else default_item_dbc
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('item_definition', type=pathlib.Path)
+    parser.add_argument('--dbc_output', default='Items.dbc.gen', type=pathlib.Path)
+    parser.add_argument('--sql_output', default='items.sql', type=pathlib.Path)
 
-    try:
-        with open(item_definition) as f:
-            config = json.loads(f.read())
-            display_ids = config['displayIds']
-            first_entry = config['firstEntry']
-            template_entry = config['templateEntry']
+    argv = parser.parse_args()
 
-        dbc_f = open(item_dbc, 'rb+')
-        sql_f = open(sql_file, 'w')
-    except OSError as e:
-        print(e)
-        sys.exit(-1)
-    except KeyError as e:
-        print(f'{item_definition} is missing key: {e}')
-        sys.exit(-1)
-    else:
-        stats = stat_iterator.get_iterators(config['stats'])
-        item_creator = functools.partial(_create_item,
-                                         config['name'],
-                                         display_ids)
-        stats_entry_zip = zip(itertools.product(*stats),
-                              itertools.count(first_entry))
-        items = itertools.starmap(item_creator, stats_entry_zip)
-        with dbc_f, sql_f:
-            dbc_file = DBCFile.from_file_handle(dbc_f,
-                                                ItemRecord,
-                                                template_entry)
-            sql_f.write(sql.generate_preface(template_entry, first_entry))
-            for item in items:
-                dbc_file.add_record(item.entry, item.display_id)
-                sql_f.write(sql.create_sql_insert(
-                    item.entry, item.entry - 1) + '\n')
-                sql_f.write(item.to_sql() + '\n')
-            sql_f.write(sql.generate_end() + '\n')
+    with open(argv.item_definition) as f:
+        raw = yaml.safe_load(f.read())
+        raw['attributes'] = {raw_range['name']:range(raw_range['min'], raw_range['max'] + 1) for raw_range in raw['attributes']}
+        item_definition = ItemDefinition(**raw)
+
+    items = itertools.product(*item_definition.attributes.values())
+    items = map(lambda values: zip(map(to_attribute_id, item_definition.attributes.keys()), values), items)
+    items = map(lambda attributes: itertools.starmap(Attribute, attributes), items)
+    items = [Item(item_definition.name, entry, random.choice(item_definition.display_ids), attributes) for (entry, attributes) in zip(itertools.count(start=item_definition.first_entry), items)]
+
+    print(*items, sep='\n')
+
+    print(item_definition)
 
 
 if __name__ == '__main__':
     main()
+
