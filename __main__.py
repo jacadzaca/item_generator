@@ -5,11 +5,12 @@ import yaml
 import random
 import itertools
 import collections
+from jinja2 import Environment, PackageLoader
 from dbc.dbc_file import DBCFile
 from dbc.records.item_record import ItemRecord
 
 ItemDefinition = collections.namedtuple('ItemDefinition', 'name first_entry template_entry display_ids attributes')
-Attribute = collections.namedtuple('Attribute', 'attribute_id value')
+Attribute = collections.namedtuple('Attribute', 'id value')
 Item = collections.namedtuple('Item', 'name entry display_id attributes')
 
 def to_attribute_id(attribute_name):
@@ -43,10 +44,17 @@ def main():
     items = map(lambda attributes: itertools.starmap(Attribute, attributes), items)
     items = [Item(item_definition.name, entry, random.choice(item_definition.display_ids), attributes) for (entry, attributes) in zip(itertools.count(start=item_definition.first_entry), items)]
 
-    print(*items, sep='\n')
+    sql = Environment(
+            loader=PackageLoader(__name__, './templates'),
+            trim_blocks=True,
+            lstrip_blocks=True) \
+    .get_template('items.jinja.sql') \
+    .render(items=items, first_entry=item_definition.first_entry,
+            attribute_count=len(item_definition.attributes),
+            template_entry=item_definition.template_entry, enumerate=enumerate)
 
-    print(item_definition)
-
+    with open(argv.sql_output, 'w') as sql_f:
+        sql_f.write(sql)
 
 if __name__ == '__main__':
     main()
