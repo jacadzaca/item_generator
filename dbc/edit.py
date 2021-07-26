@@ -20,7 +20,12 @@ def append_record(record: Record, header: DBCHeader, file: BinaryIO):
     for field in record.to_bytes():
         file.write(field)
     # write strings...
-    file.write('\0'.join(record.strings()).encode())
+    #file.write('\0'.join(record.strings()).encode())
+
+def write_records(records, header, f):
+    header.record_count = 0
+    for record in records:
+        append_record(record, header, f)
 
 
 def find(entry: int, records: RecordIterator) -> Optional[Record]:

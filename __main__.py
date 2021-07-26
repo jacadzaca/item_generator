@@ -2,11 +2,14 @@
 import argparse
 import pathlib
 import yaml
+import copy
 import random
 import itertools
 import collections
+import dbc.edit
 from jinja2 import Environment, PackageLoader
-from dbc.dbc_file import DBCFile
+from dbc.dbc_header import DBCHeader
+from dbc.records.record_iterator import RecordIterator
 from dbc.records.item_record import ItemRecord
 
 ItemDefinition = collections.namedtuple('ItemDefinition', 'name first_entry template_entry display_ids attributes')
@@ -26,10 +29,17 @@ def to_attribute_id(attribute_name):
         'spirit': 6,
     }[attribute_name]
 
+def to_item_record(item, tempate_record):
+    record = copy.copy(tempate_record)
+    record.entry = item.entry
+    record.display_id = item.display_id
+    return record
+
 def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('item_definition', type=pathlib.Path)
-    parser.add_argument('--dbc_output', default='Items.dbc.gen', type=pathlib.Path)
+    parser.add_argument('--dbc_input', default='Item.dbc', type=pathlib.Path)
+    parser.add_argument('--dbc_output', default='Item.dbc.gen', type=pathlib.Path)
     parser.add_argument('--sql_output', default='items.sql', type=pathlib.Path)
 
     argv = parser.parse_args()
@@ -55,6 +65,14 @@ def main():
 
     with open(argv.sql_output, 'w') as sql_f:
         sql_f.write(sql)
+
+    with open(argv.dbc_input, 'rb') as f, open(argv.dbc_output, 'w+b') as output_f:
+        header = DBCHeader.from_file_handle(f)
+        records = RecordIterator.create(f, header, ItemRecord)
+        template = dbc.edit.find(item_definition.template_entry, records)
+
+        records.new_records = map(lambda item: to_item_record(item, template), items)
+        dbc.edit.write_records(records, header, output_f)
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
+import dbc.bytes_util as bytes_util
 from typing import List
 from typing import BinaryIO
-import dbc.bytes_util as bytes_util
 from dataclasses import dataclass
 
 
