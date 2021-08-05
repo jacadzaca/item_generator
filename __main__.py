@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 import argparse
 import pathlib
-import yaml
 import copy
 import random
 import itertools
 import collections
-import dbc.edit
+import shutil
+
+import yaml
+
 from jinja2 import Environment, PackageLoader
-from dbc.dbc_header import DBCHeader
-from dbc.records.record_iterator import RecordIterator
-from dbc.records.item_record import ItemRecord
+
+from dbcpy.dbc_file import DBCFile
+from dbcpy.records.item_record import ItemRecord
 
 ItemDefinition = collections.namedtuple('ItemDefinition', 'name first_entry template_entry display_ids attributes')
 Attribute = collections.namedtuple('Attribute', 'id value')
@@ -86,15 +88,17 @@ def main():
         raw['attributes'] = {raw_range['name']:range(raw_range['min'], raw_range['max'] + 1) for raw_range in raw['attributes']}
         item_definition = ItemDefinition(**raw)
 
-    items = itertools.product(*item_definition.attributes.values())
-    items = map(lambda values: zip(map(to_attribute_id, item_definition.attributes.keys()), values), items)
-    items = map(lambda attributes: itertools.starmap(Attribute, attributes), items)
-    items = [Item(item_definition.name, entry, random.choice(item_definition.display_ids), attributes) for (entry, attributes) in zip(itertools.count(start=item_definition.first_entry), items)]
+    attributes_combinations = itertools.product(*item_definition.attributes.values())
+    attributes_ids = map(to_attribute_id, item_definition.attributes.keys())
+    attributes = (zip(attributes_ids, attributes_combination) for attributes_combination in attributes_combinations)
+    attributes = (itertools.starmap(Attribute, attributes) for attribute in attributes)
+    items = [Item(item_definition.name, entry, random.choice(item_definition.display_ids), attributes)
+             for (entry, attributes) in enumerate(attributes, item_definition.first_entry)]
 
     sql = Environment(
-            loader=PackageLoader(__name__, './templates'),
-            trim_blocks=True,
-            lstrip_blocks=True) \
+        loader=PackageLoader(__name__, './templates'),
+        trim_blocks=True,
+        lstrip_blocks=True) \
     .get_template('items.jinja.sql') \
     .render(items=items, first_entry=item_definition.first_entry,
             attribute_count=len(item_definition.attributes),
@@ -103,13 +107,11 @@ def main():
     with open(argv.sql_output, 'w') as sql_f:
         sql_f.write(sql)
 
-    with open(argv.dbc_input, 'rb') as f, open(argv.dbc_output, 'w+b') as output_f:
-        header = DBCHeader.from_file_handle(f)
-        records = RecordIterator.create(f, header, ItemRecord)
-        template = dbc.edit.find(item_definition.template_entry, records)
-
-        records.new_records = map(lambda item: to_item_record(item, template), items)
-        dbc.edit.write_records(records, header, output_f)
+    shutil.copyfile(argv.dbc_input, argv.dbc_output)
+    with open(argv.dbc_output, 'r+b') as f:
+        dbc_file = DBCFile.from_file(f, ItemRecord)
+        template = dbc_file.records.find(item_definition.template_entry)
+        dbc_file.records.append(*[to_item_record(item, template) for item in items])
 
 if __name__ == '__main__':
     main()
