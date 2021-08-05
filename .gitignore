@@ -1,7 +1,7 @@
-generated/*
-random-staff.yaml
+*.yaml
 dbc/__pycache__/*
 dbc/records/__pycache__/*
 __pycache__/*
-Item.dbc
+*.dbc*
+items.sql
 venv/*

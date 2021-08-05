@@ -11,3 +11,4 @@ UPDATE item_template SET StatsCount={{ attribute_count }},{% for (i, attribute) 
 {% endfor %}
 
 DROP TABLE tmp;
+

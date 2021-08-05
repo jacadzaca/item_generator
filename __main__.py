@@ -9,7 +9,7 @@ import shutil
 
 import yaml
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 
 from dbcpy.dbc_file import DBCFile
 from dbcpy.records.item_record import ItemRecord
@@ -75,11 +75,12 @@ def to_item_record(item, tempate_record):
     return record
 
 def main():
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('item_definition', type=pathlib.Path)
-    parser.add_argument('--dbc_input', default='Item.dbc', type=pathlib.Path)
-    parser.add_argument('--dbc_output', default='Item.dbc.gen', type=pathlib.Path)
-    parser.add_argument('--sql_output', default='items.sql', type=pathlib.Path)
+    parser = argparse.ArgumentParser(description="a small script that outputs both DBC and SQL files need to create 'random' items",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('item_definition', help='the path to the YAML file containing description of items to be generated', type=pathlib.Path)
+    parser.add_argument('--dbc_input', help='where the Item.dbc is located', default='Item.dbc', type=pathlib.Path)
+    parser.add_argument('--dbc_output', help='where to output Item.dbc with new items', default='Item.dbc.gen', type=pathlib.Path)
+    parser.add_argument('--sql_output', help='where to output the SQL with new items', default='items.sql', type=pathlib.Path)
 
     argv = parser.parse_args()
 
@@ -96,7 +97,7 @@ def main():
              for (entry, attributes) in enumerate(attributes, item_definition.first_entry)]
 
     sql = Environment(
-        loader=PackageLoader(__name__, './templates'),
+        loader=FileSystemLoader('.'),
         trim_blocks=True,
         lstrip_blocks=True) \
     .get_template('items.jinja.sql') \
